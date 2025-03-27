@@ -1,0 +1,26 @@
+{
+  "name": "gallery",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "predev": "node scripts/photosScanner.cjs",
+    "dev": "cross-env NODE_ENV=development vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@fancyapps/ui": "^5.0.36",
+    "@headlessui/vue": "^1.7.23",
+    "@heroicons/vue": "^2.2.0",
+    "exif-js": "^2.3.0",
+    "piexifjs": "^1.0.6",
+    "vue": "^3.5.13"
+  },
+  "devDependencies": {
+    "@types/piexifjs": "^1.0.0",
+    "@vitejs/plugin-vue": "^5.2.1",
+    "cross-env": "^7.0.3",
+    "vite": "^6.2.0"
+  }
+}
