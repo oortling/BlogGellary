@@ -23,7 +23,6 @@ const cameraIcon = computed(() => {
       <span v-if="exifData.FocalLength">{{ exifData.FocalLength }}mm</span>
       <span v-if="exifData.FNumber">ƒ/{{ exifData.FNumber }}</span>
       <span v-if="exifData.ExposureTime">{{ exifData.ExposureTime }}s</span>
-      <span v-if="exifData.LensModel">| {{ exifData.LensModel }}</span>
     </div>
     <div class="exif-info-right">
       <img v-if="cameraIcon" :src="cameraIcon" :alt="exifData.Make" class="camera-icon" />

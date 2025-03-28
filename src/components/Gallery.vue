@@ -56,15 +56,15 @@ onMounted(async () => {
     const groups = await fetchPhotos()
 
     // 为每张照片加载EXIF数据
-    // for (const group of groups) {
-    //     for (const photo of group.photos) {
-    //         try {
-    //             photo.exif = await loadExifData(photo.src)
-    //         } catch (e) {
-    //             console.error('Failed to load EXIF data:', e)
-    //         }
-    //     }
-    // }
+    for (const group of groups) {
+        for (const photo of group.photos) {
+            try {
+                photo.exif = await loadExifData(photo.src)
+            } catch (e) {
+                console.error('Failed to load EXIF data:', e)
+            }
+        }
+    }
 
     photoGroups.value = groups
 
@@ -76,27 +76,19 @@ onMounted(async () => {
             infinite: false,
         },
         Images: {
-            content: (_ref, slide) => {
-                let rez = "<picture>";
-                rez += `<img src="${slide.src}" alt=""/>`;
-                loadExifData(slide.src)
-                .then((exifData) => {
-                    console.log(exifData);
-                    rez += "<h2>Exif Data</h2>";
-                    rez += "</picture>";
-                }).catch((error) => {
-                    console.error('Failed to load EXIF data:', error);
-                }).finally(() => {
-                    console.log('EXIF data loading completed.');
-                });
-                // const appDiv = document.createElement('div');
-                // const app = createApp({
-                //     render: () => h(ExifCard, { exifData })
-                // });
-                // app.mount(appDiv);
-                // rez += appDiv.innerHTML;
-                return rez;
-            },
+            // content: (_ref, slide) => {
+            //     let rez = "<picture>";
+            //     rez += `<img src="${slide.src}" alt="" "/>`;
+            //     const exifData = photoGroups.value.find(g => g.photos.some(p => p.src === slide.src)).photos.find(p => p.src === slide.src).exif;
+            //     const appDiv = document.createElement('div');
+            //     const app = createApp({
+            //         render: () => h(ExifCard, { exifData })
+            //     });
+            //     app.mount(appDiv);
+            //     rez += appDiv.innerHTML;
+            //     rez += "</picture>";
+            //     return rez;
+            // },
             protected: true,
             zoom: true,
         },

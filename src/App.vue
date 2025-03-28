@@ -1,6 +1,26 @@
 <script setup>
+import { ref, onMounted, onUnmounted } from 'vue'
 import Gallery from './components/Gallery.vue'
 import Header from './components/Header.vue'
+import Footer from './components/Footer.vue'
+
+const showFooter = ref(false)
+
+const handleScroll = () => {
+  const scrollY = window.scrollY
+  const innerHeight = window.innerHeight
+  const scrollHeight = document.documentElement.scrollHeight
+  
+  showFooter.value = scrollY + innerHeight >= scrollHeight - 100
+}
+
+onMounted(() => {
+  window.addEventListener('scroll', handleScroll)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('scroll', handleScroll)
+})
 </script>
 
 <template>
@@ -9,6 +29,7 @@ import Header from './components/Header.vue'
     <main class="main-content">
       <Gallery />
     </main>
+    <Footer :visible="showFooter" />
   </div>
 </template>
 
@@ -32,6 +53,7 @@ Header {
   padding-top: 160px;
   max-width: 1200px;
   margin: 0 auto;
+  padding-bottom: 100px;
 }
 
 .scrolled Header {
