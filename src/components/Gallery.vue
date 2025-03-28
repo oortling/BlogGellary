@@ -1,6 +1,7 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, createApp, h } from 'vue'
 import { Fancybox } from "@fancyapps/ui"
+import ExifCard from './ExifCard.vue';
 import "@fancyapps/ui/dist/fancybox/fancybox.css"
 import piexif from 'piexifjs'
 
@@ -8,25 +9,20 @@ const photoGroups = ref([])
 
 // 模拟从API获取照片数据
 const fetchPhotos = async () => {
-  try {
-    const response = await fetch('photos.json')
-    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
-    const data = await response.json()
-    return Array.isArray(data) ? data : []
-  } catch (error) {
-    console.error('加载照片数据失败:', error)
-    return []
-  }
+    try {
+        const response = await fetch('photos.json')
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
+        const data = await response.json()
+        return Array.isArray(data) ? data : []
+    } catch (error) {
+        console.error('加载照片数据失败:', error)
+        return []
+    }
 }
 
-const formatExifInfo = (exifData) => {
-    if (!exifData) return '';
-    return `相机: ${exifData.Make || ''} ${exifData.Model || ''} | 光圈: ${exifData.FNumber || ''} | 快门: ${exifData.ExposureTime || ''} | ISO: ${exifData.ISOSpeedRatings || ''}`;
-};
-
-const loadExifData = (photo) => {
+const loadExifData = (photoPath) => {
     return new Promise((resolve) => {
-        fetch(photo.src)
+        fetch(photoPath)
             .then(response => response.arrayBuffer())
             .then(buffer => {
                 try {
@@ -39,7 +35,9 @@ const loadExifData = (photo) => {
                         Model: exifStr['0th'][piexif.ImageIFD.Model],
                         FNumber: exifStr['Exif'][piexif.ExifIFD.FNumber],
                         ExposureTime: exifStr['Exif'][piexif.ExifIFD.ExposureTime],
-                        ISOSpeedRatings: exifStr['Exif'][piexif.ExifIFD.ISOSpeedRatings]
+                        ISOSpeedRatings: exifStr['Exif'][piexif.ExifIFD.ISOSpeedRatings],
+                        FocalLength: exifStr['Exif'][piexif.ExifIFD.FocalLength],
+                        LensModel: exifStr['Exif'][piexif.ExifIFD.LensModel]
                     };
                     resolve(exifData);
                 } catch (e) {
@@ -58,15 +56,15 @@ onMounted(async () => {
     const groups = await fetchPhotos()
 
     // 为每张照片加载EXIF数据
-    for (const group of groups) {
-        for (const photo of group.photos) {
-            try {
-                photo.exif = await loadExifData(photo)
-            } catch (e) {
-                console.error('Failed to load EXIF data:', e)
-            }
-        }
-    }
+    // for (const group of groups) {
+    //     for (const photo of group.photos) {
+    //         try {
+    //             photo.exif = await loadExifData(photo.src)
+    //         } catch (e) {
+    //             console.error('Failed to load EXIF data:', e)
+    //         }
+    //     }
+    // }
 
     photoGroups.value = groups
 
@@ -78,6 +76,28 @@ onMounted(async () => {
             infinite: false,
         },
         Images: {
+            content: (_ref, slide) => {
+                let rez = "<picture>";
+                rez += `<img src="${slide.src}" alt=""/>`;
+                loadExifData(slide.src)
+                .then((exifData) => {
+                    console.log(exifData);
+                    rez += "<h2>Exif Data</h2>";
+                    rez += "</picture>";
+                }).catch((error) => {
+                    console.error('Failed to load EXIF data:', error);
+                }).finally(() => {
+                    console.log('EXIF data loading completed.');
+                });
+                // const appDiv = document.createElement('div');
+                // const app = createApp({
+                //     render: () => h(ExifCard, { exifData })
+                // });
+                // app.mount(appDiv);
+                // rez += appDiv.innerHTML;
+                return rez;
+            },
+            protected: true,
             zoom: true,
         },
         showClass: 'f-fadeIn',
@@ -92,7 +112,7 @@ onMounted(async () => {
             <h2>{{ group.date }}</h2>
             <div class="photo-grid">
                 <a v-for="(photo, index) in group.photos" :key="index" :href="photo.src"
-                    :data-fancybox="`gallery-${group.date}`" :data-caption="`${photo.exif ? '\n' + formatExifInfo(photo.exif) : ''}`" class="photo-item">
+                    :data-fancybox="`gallery-${group.date}`" :data-src="photo.src" class="photo-item">
                     <img :src="photo.src" :alt="photo.alt" />
                 </a>
             </div>
@@ -151,5 +171,10 @@ onMounted(async () => {
 
 .photo-item:hover img {
     transform: scale(1.05);
+}
+
+.image-container {
+    position: relative;
+    height: 100%;
 }
 </style>
